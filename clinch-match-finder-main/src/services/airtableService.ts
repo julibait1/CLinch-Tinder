@@ -264,9 +264,9 @@ export const airtableService = {
       
       console.log("Obteniendo posiciones para el cliente ID:", clientId);
       
-      // Intentamos obtener las posiciones de Airtable usando el campo correcto "Cliente"
+      // Intentamos obtener las posiciones de Airtable usando el nombre de columna correcto
       const response = await airtableClient.get(
-        `/${AIRTABLE_BASE_ID}/${POSITIONS_TABLE_ID}?filterByFormula={Cliente}="${clientId}"`
+        `/${AIRTABLE_BASE_ID}/${POSITIONS_TABLE_ID}?filterByFormula={Clientes}="${clientId}"`
       );
       
       const records = response.data.records;
@@ -294,9 +294,9 @@ export const airtableService = {
     try {
       console.log("Obteniendo candidatos para la posición ID:", positionId);
       
-      // Intentamos obtener los candidatos de Airtable usando el campo correcto "Posición aplicada"
+      // Intentamos obtener los candidatos de Airtable usando el nombre de columna correcto
       const response = await airtableClient.get(
-        `/${AIRTABLE_BASE_ID}/${CANDIDATES_TABLE_ID}?filterByFormula=AND({Posición aplicada}="${positionId}",{Estado}="Pending")`
+        `/${AIRTABLE_BASE_ID}/${CANDIDATES_TABLE_ID}?filterByFormula=AND({ID de la posición a la que aplica}="${positionId}",{Estado}="Pending")`
       );
       
       const records = response.data.records;
@@ -385,12 +385,18 @@ export const airtableService = {
       position: record.fields.Posición || "",
       location: record.fields.Ubicación || "",
       experienceLevel: record.fields["Nivel de experiencia"] || "",
-      mainSkills: record.fields["Habilidades principales"] ? record.fields["Habilidades principales"].split(",").map((s: string) => s.trim()) : [],
+      mainSkills: record.fields["Habilidades principales"] ? 
+        Array.isArray(record.fields["Habilidades principales"]) ? 
+          record.fields["Habilidades principales"] : 
+          record.fields["Habilidades principales"].split(",").map((s: string) => s.trim()) : [],
       workMode: (record.fields["Modalidad de trabajo"] as 'remote' | 'onsite' | 'hybrid') || 'remote',
       englishLevel: record.fields["Nivel de inglés"] || "",
       estimatedSalary: record.fields["Salario estimado"] || "",
       additionalComments: record.fields["Comentarios adicionales"] || "",
-      clientId: record.fields.Cliente ? record.fields.Cliente[0] || "" : ""
+      clientId: record.fields.Clientes ? 
+        Array.isArray(record.fields.Clientes) ? 
+          record.fields.Clientes[0] || "" : 
+          record.fields.Clientes : ""
     };
   },
 
@@ -400,17 +406,26 @@ export const airtableService = {
       name: record.fields.Nombre || "",
       photo: record.fields.Foto && record.fields.Foto.length > 0 
         ? record.fields.Foto[0].url : undefined,
-      currentRole: record.fields["Rol actual"] || "",
+      currentRole: record.fields["Puesto actual"] || "",
       yearsOfExperience: Number(record.fields["Años de experiencia"]) || 0,
-      mainSkills: record.fields["Habilidades principales"] ? record.fields["Habilidades principales"].split(",").map((s: string) => s.trim()) : [],
+      mainSkills: record.fields["Habilidades principales"] ? 
+        Array.isArray(record.fields["Habilidades principales"]) ? 
+          record.fields["Habilidades principales"] : 
+          record.fields["Habilidades principales"].split(",").map((s: string) => s.trim()) : [],
       location: record.fields.Ubicación || "",
       englishLevel: record.fields["Nivel de inglés"] || "",
       desiredSalary: record.fields["Salario deseado"] || "",
       cv: record.fields.CV && record.fields.CV.length > 0 
         ? record.fields.CV[0].url : undefined,
-      applyingPositionId: record.fields["Posición aplicada"] ? record.fields["Posición aplicada"][0] || "" : "",
+      applyingPositionId: record.fields["ID de la posición a la que aplica"] ? 
+        Array.isArray(record.fields["ID de la posición a la que aplica"]) ? 
+          record.fields["ID de la posición a la que aplica"][0] || "" : 
+          record.fields["ID de la posición a la que aplica"] : "",
       status: record.fields.Estado || "Pending",
-      feedbackClientId: record.fields["Cliente que dio feedback"] ? record.fields["Cliente que dio feedback"][0] : undefined,
+      feedbackClientId: record.fields["Cliente que dio feedback"] ? 
+        Array.isArray(record.fields["Cliente que dio feedback"]) ? 
+          record.fields["Cliente que dio feedback"][0] : 
+          record.fields["Cliente que dio feedback"] : undefined,
       feedbackDate: record.fields["Fecha de feedback"]
     };
   }
